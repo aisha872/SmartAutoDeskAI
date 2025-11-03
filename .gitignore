@@ -1,9 +1,10 @@
-# Python
+# Ignore email secrets and sensitive info
+*.env
+*.toml
+known_face.jpg
+
+# Ignore attachments folder
+Attachments/
 __pycache__/
 *.pyc
-*.pyo
-*.pyd
-env/
-venv/
-*.sqlite3
 .DS_Store
