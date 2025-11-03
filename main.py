@@ -1,6 +1,5 @@
 # main.py
 import streamlit as st
-import pywhatkit
 import imaplib
 import email
 import os
@@ -10,6 +9,10 @@ from pathlib import Path
 import pandas as pd
 import matplotlib.pyplot as plt
 from PyPDF2 import PdfReader
+
+# Only import pywhatkit if running locally
+if not os.environ.get("STREAMLIT_CLOUD"):
+    import pywhatkit
 
 # -------------------------------
 # PIN LOCK
@@ -104,9 +107,12 @@ def read_unread_emails(account_email, account_password):
     return messages
 
 # -------------------------------
-# WhatsApp Notification
+# WhatsApp Notification (Cloud-safe)
 # -------------------------------
 def notify_user(reply_text):
+    if os.environ.get("STREAMLIT_CLOUD"):
+        st.info("WhatsApp notifications disabled on Streamlit Cloud")
+        return
     try:
         pywhatkit.sendwhatmsg_instantly(notify_number, reply_text)
         st.success(f"Notification sent to {notify_number}")
