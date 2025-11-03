@@ -7,6 +7,8 @@ import os
 import json
 from datetime import datetime, timedelta
 from pathlib import Path
+import pandas as pd
+import matplotlib.pyplot as plt
 from PyPDF2 import PdfReader
 
 # -------------------------------
@@ -50,7 +52,7 @@ def save_log(log):
         json.dump(log, f, indent=2)
 
 # -------------------------------
-# Dynamic AI Reply (simple)
+# Dynamic AI Reply
 # -------------------------------
 def ai_generate_reply(email_body, sender, subject):
     snippet = email_body[:50].replace("\n", " ")
@@ -114,7 +116,7 @@ def notify_user(reply_text):
 # -------------------------------
 # Streamlit UI
 # -------------------------------
-st.title("📧💬 SmartAutoDesk AI - Multi-Sender Email & Automation Hub")
+st.title("📧💬 SmartAutoDesk AI - Full Automation Hub")
 
 log = load_log()
 total_processed = len(log)
@@ -146,14 +148,14 @@ if st.button("Check & Process All Emails"):
     st.success(f"All emails processed! New emails handled: {new_count}")
 
 # -------------------------------
-# Stats & Last 5 processed emails
+# Stats & Last 5 AI Replies
 # -------------------------------
 st.subheader("📊 Stats")
 st.write(f"Total processed emails: {total_processed}")
 st.write(f"Newly processed emails: {len(log) - total_processed}")
 st.write(f"Total attachments downloaded: {sum(len(e['attachments']) for e in log)}")
 
-st.subheader("📝 Last 5 AI replies")
+st.subheader("📝 Last 5 AI Replies")
 if log:
     for entry in log[-5:]:
         with st.expander(f"{entry['timestamp']} | {entry['sender']} | {entry['subject']}"):
@@ -164,7 +166,7 @@ else:
     st.info("No emails processed yet.")
 
 # -------------------------------
-# Daily summary (last 24h)
+# Daily Summary (Last 24h)
 # -------------------------------
 if st.button("Show 24h AI Summary"):
     st.subheader("📅 Last 24h AI replies")
@@ -192,3 +194,31 @@ if old_emails:
         st.warning(f"{e['timestamp']} | {e['sender']} | {e['subject']} - Follow-up needed")
 else:
     st.info("No follow-ups needed.")
+
+# -------------------------------
+# Interactive Charts / Dashboard
+# -------------------------------
+if log:
+    df = pd.DataFrame(log)
+    df['timestamp'] = pd.to_datetime(df['timestamp'])
+    
+    st.subheader("📈 Emails Processed Over Time")
+    emails_over_time = df.groupby(df['timestamp'].dt.date).size()
+    st.line_chart(emails_over_time)
+
+    st.subheader("📊 Attachments by Type")
+    all_attachments = [Path(a) for sublist in df['attachments'] for a in sublist]
+    extensions = [a.suffix.lower() for a in all_attachments]
+    if extensions:
+        ext_count = pd.Series(extensions).value_counts()
+        st.bar_chart(ext_count)
+    else:
+        st.info("No attachments yet.")
+
+    st.subheader("🥇 Top Senders")
+    top_senders = df['sender'].value_counts()
+    st.bar_chart(top_senders)
+
+    st.subheader("🤖 AI Replies Activity")
+    replies_over_time = df.groupby(df['timestamp'].dt.date).size()
+    st.line_chart(replies_over_time)
