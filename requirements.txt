@@ -1,5 +1,5 @@
 streamlit
+transformers
 pandas
 matplotlib
-PyPDF2
-pywhatkit
+torch
