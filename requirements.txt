@@ -1,5 +1,5 @@
 streamlit
-pywhatkit
-PyPDF2
 pandas
 matplotlib
+PyPDF2
+pywhatkit
